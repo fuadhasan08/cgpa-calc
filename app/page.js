@@ -5,13 +5,7 @@ import CourseList from '@/components/CourseList';
 // import GradeChart from './GradeChart';
 
 function Home() {
-  const [courses, setCourses] = useState([
-    {
-      courseName: 'Sample 1',
-      creditHours: 3,
-      grade: 'A+',
-    },
-  ]);
+  const [courses, setCourses] = useState([]);
   const [courseName, setCourseName] = useState('');
   const [creditHours, setCreditHours] = useState('');
   const [grade, setGrade] = useState('');
