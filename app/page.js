@@ -1,91 +1,126 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+'use client';
+import React, { useState } from 'react';
 
-const inter = Inter({ subsets: ['latin'] })
+import CourseList from '@/components/CourseList';
+// import GradeChart from './GradeChart';
 
-export default function Home() {
+function Home() {
+  const [courses, setCourses] = useState([
+    {
+      courseName: 'Sample 1',
+      creditHours: 3,
+      grade: 'A+',
+    },
+  ]);
+  const [courseName, setCourseName] = useState('');
+  const [creditHours, setCreditHours] = useState('');
+  const [grade, setGrade] = useState('');
+
+  const addCourse = () => {
+    if (courseName && creditHours && grade) {
+      const newCourse = {
+        courseName,
+        creditHours: parseFloat(creditHours),
+        grade,
+      };
+
+      setCourses([...courses, newCourse]);
+      setCourseName('');
+      setCreditHours('');
+      setGrade('');
+    }
+  };
+
+  const deleteCourse = (index) => {
+    const updatedCourses = [...courses];
+    updatedCourses.splice(index, 1);
+    setCourses(updatedCourses);
+  };
+
+  const onEditCourse = (editedCourse) => {
+    const updatedCourses = [...courses];
+    const index = updatedCourses.findIndex((course) => course === editedCourse);
+    if (index !== -1) {
+      updatedCourses[index] = editedCourse;
+      setCourses(updatedCourses);
+    }
+  };
+
+  const calculateCGPA = () => {
+    const totalCreditPoints = courses.reduce(
+      (total, course) =>
+        total + course.creditHours * getGradePoints(course.grade),
+      0
+    );
+    const totalCredits = courses.reduce(
+      (total, course) => total + course.creditHours,
+      0
+    );
+
+    return totalCreditPoints / totalCredits;
+  };
+
+  const getGradePoints = (grade) => {
+    const gradingScale = {
+      'A+': 4.0,
+      A: 3.75,
+      'B+': 3.5,
+      B: 3.25,
+      'C+': 3,
+      'C:': 2.75,
+      'D+': 2.5,
+      D: 2.25,
+      F: 0,
+    };
+
+    return gradingScale[grade] || 0.0;
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <div className='App'>
+      <h1>CGPA Calculator</h1>
+      <div className='course-entry'>
+        <input
+          type='text'
+          placeholder='Course Name'
+          value={courseName}
+          onChange={(e) => setCourseName(e.target.value)}
         />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
+        <select
+          value={creditHours}
+          onChange={(e) => setCreditHours(e.target.value)}
+        >
+          <option value=''>Select Credit Hours</option>
+          <option value='1'>1</option>
+          <option value='2'>2</option>
+          <option value='3'>3</option>
+        </select>
+        <select value={grade} onChange={(e) => setGrade(e.target.value)}>
+          <option value=''>Select Grade</option>
+          <option value='A+'>A+</option>
+          <option value='A'>A</option>
+          <option value='B+'>B+</option>
+          <option value='B'>B</option>
+          <option value='C+'>C+</option>
+          <option value='C'>C</option>
+          <option value='D+'>D+</option>
+          <option value='D'>D</option>
+          <option value='F'>F</option>
+          {/* Add more grade options here */}
+        </select>
+        <button onClick={addCourse}>Add Course</button>
       </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      <CourseList
+        courses={courses}
+        onDeleteCourse={deleteCourse}
+        onEditCourse={onEditCourse}
+      />
+      {/* <GradeChart /> */}
+      {courses.length > 1 && (
+        <div className='cgpa'>CGPA: {calculateCGPA().toFixed(2)}</div>
+      )}
+    </div>
+  );
 }
+
+export default Home;
